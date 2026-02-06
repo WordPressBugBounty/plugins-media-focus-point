@@ -1,0 +1,60 @@
+# Copyright (C) 2025 WP Company
+# This file is distributed under the GPLv3 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Media Focus Point 1.4\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/media-focus-point\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-03-05T08:24:33+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: media-focus-point\n"
+
+#. Plugin Name of the plugin
+#: media-focus-point.php
+#: media-focus-point.php:100
+msgid "Media Focus Point"
+msgstr ""
+
+#. Description of the plugin
+#: media-focus-point.php
+msgid "Ensures that your selected focus area of an image remains centered and visible, even when resized."
+msgstr ""
+
+#. Author of the plugin
+#: media-focus-point.php
+msgid "WP Company"
+msgstr ""
+
+#. Author URI of the plugin
+#: media-focus-point.php
+msgid "https://www.wpcompany.nl"
+msgstr ""
+
+#: media-focus-point.php:39
+msgid "Click on the image to set the focus point"
+msgstr ""
+
+#: media-focus-point.php:42
+msgid "Cancel"
+msgstr ""
+
+#: media-focus-point.php:45
+msgid "Save"
+msgstr ""
+
+#: media-focus-point.php:64
+msgid "This field contains the X-percentage"
+msgstr ""
+
+#: media-focus-point.php:74
+msgid "This field contains the Y-percentage"
+msgstr ""
+
+#: media-focus-point.php:92
+msgid "Reset"
+msgstr ""

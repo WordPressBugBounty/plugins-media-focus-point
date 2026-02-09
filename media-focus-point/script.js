@@ -109,21 +109,41 @@ function triggerChange(element) {
 	}
 }
 
+// Decodes a base64 string and handles UTF-8 characters correctly
+function b64DecodeUTF8(str) {
+	try {
+		const binString = atob(str);
+		const bytes = new Uint8Array(binString.length);
+		for (let i = 0; i < binString.length; i++) {
+			bytes[i] = binString.charCodeAt(i);
+		}
+		return new TextDecoder('utf-8').decode(bytes);
+	} catch (e) {
+		console.error("Media Focus Point: Error decoding media tag:", e);
+		return atob(str); // Fallback to standard atob
+	}
+}
+
 function waitForMediaLoad(media) {
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		if (media.tagName.toLowerCase() === "video") {
 			if (media.readyState >= 2) {
 				resolve(media);
 			} else {
 				media.onloadeddata = () => resolve(media);
+				media.onerror = () => reject(new Error("Video failed to load"));
 			}
 		} else {
-			if (media.complete) {
+			if (media.complete && media.naturalWidth !== 0) {
 				resolve(media);
 			} else {
 				media.onload = () => resolve(media);
+				media.onerror = () => reject(new Error("Image failed to load"));
 			}
 		}
+
+		// Add a timeout to prevent absolute hanging
+		setTimeout(() => reject(new Error("Media load timeout")), 5000);
 	});
 }
 
@@ -155,7 +175,7 @@ async function set_focus(e) {
 	}
 	mediaPreviewContainer.classList.add('wpcmfp-media-preview-container');
 	// Fetch data-attribute data-media-tag, which should contain a base64 encoded string of the media tag
-	mediaPreviewContainer.innerHTML = atob(hiddenInput.dataset.mediaTag);
+	mediaPreviewContainer.innerHTML = b64DecodeUTF8(hiddenInput.dataset.mediaTag);
 	// Save pin to add back again later
 	const pin = mediaContainer.querySelector('.wpcmfp-pin');
 	// Clear overlay contents
@@ -166,7 +186,7 @@ async function set_focus(e) {
 	mediaContainer.append(mediaPreviewContainer);
 
 	replaceCustomVideoElements()
-	document.querySelectorAll(".wpcmfp-media-frame-content,.wpcmfp-media-sidebar").forEach(el => el.classList.add('show'));
+	document.querySelectorAll(".wpcmfp-media-frame-content,.wpcmfp-media-sidebar").forEach(el => el.classList.add('wpcmfp-show'));
 	document.querySelectorAll(".wpcmfp-media-toolbar,.wpcmfp-media-menu-item").forEach(el => el.style.zIndex = 0);
 	set_bg_values();
 	document.querySelector('.wpcmfp-overlay').classList.add('wpcmfp-show');
@@ -180,7 +200,11 @@ async function set_focus(e) {
 		return;
 	}
 
-	await waitForMediaLoad(media);
+	try {
+		await waitForMediaLoad(media);
+	} catch (error) {
+		console.warn("Media load error, proceeding anyway:", error);
+	}
 	const rect = media.getBoundingClientRect();
 	containerHt = container.clientHeight;
 	containerWt = container.clientWidth;

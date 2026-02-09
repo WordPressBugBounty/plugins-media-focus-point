@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point

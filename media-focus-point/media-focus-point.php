@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.0.5
+ * Version: 2.0.6
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point
@@ -13,6 +13,19 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+/**
+ * Check whether Blocksy (or a Blocksy child theme) is active.
+ *
+ * Keeping the compatibility layer behind this check prevents it from changing
+ * the output or loading assets for other themes.
+ */
+function wpcmfp_is_blocksy_theme() {
+    $theme = wp_get_theme();
+
+    return 'blocksy' === strtolower( $theme->get_template() )
+        || 'blocksy' === strtolower( $theme->get_stylesheet() );
+}
 
 // Add custom media field to image/video attachments
 function wpcmfp_media_add_media_custom_field( $form_fields, $post ) {
@@ -121,6 +134,16 @@ function wpcmfp_filter_gallery_img_attributes( $atts, $attachment ) {
     if ( ! empty( $bg_pos_desktop ) ) {
         $style = "object-position: " . esc_attr( $bg_pos_desktop ) . ';';
         $atts['style'] = isset( $atts['style'] ) ? $atts['style'] . ' ' . $style : $style;
+
+        /*
+         * Blocksy adds its aspect-ratio styles after this WordPress filter has
+         * run, replacing the complete style attribute in the process. Preserve
+         * the focus point separately so the small Blocksy compatibility script
+         * can restore object-position after Blocksy has finished rendering.
+         */
+        if ( wpcmfp_is_blocksy_theme() ) {
+            $atts['data-wpcmfp-focus-point'] = esc_attr( $bg_pos_desktop );
+        }
     }
 
     return $atts;
@@ -197,6 +220,24 @@ function wpcmfp_media_focus_point_admin_scripts() {
     wp_enqueue_script( 'wpc-mfp-js', plugin_dir_url( __FILE__ ) . 'script.js', [], filemtime( __FILE__ ), ['in_footer' => true] );
 }
 add_action( 'admin_enqueue_scripts', 'wpcmfp_media_focus_point_admin_scripts' );
+
+// Restore focus points that Blocksy's image renderer overwrites.
+function wpcmfp_blocksy_frontend_scripts() {
+    if ( ! wpcmfp_is_blocksy_theme() ) {
+        return;
+    }
+
+    $script_path = plugin_dir_path( __FILE__ ) . 'blocksy.js';
+
+    wp_enqueue_script(
+        'wpc-mfp-blocksy',
+        plugin_dir_url( __FILE__ ) . 'blocksy.js',
+        [],
+        filemtime( $script_path ),
+        true
+    );
+}
+add_action( 'wp_enqueue_scripts', 'wpcmfp_blocksy_frontend_scripts' );
 
 
 // Helper: Get background style for images (and optionally videos)

@@ -4,7 +4,7 @@ Tags: focus, focal, image, background, video
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,6 +108,9 @@ Yes, the plugin is designed to be compatible with most WordPress themes that use
 3. This screenshot illustrates how the image resizes while ensuring the focus point remains visible.
 
 == Changelog ==
+
+= 2.0.6 =
+* Added support for Blocksy image rendering, including dynamically loaded images.
 
 = 2.0.5 =
 * Correctly decodes Base64 UTF-8 strings for opening in modal (Example: ExampleImagewithCopyright©.png)

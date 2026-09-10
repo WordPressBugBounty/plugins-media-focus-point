@@ -1,5 +1,5 @@
 /* Only focused images need a constrained box for object-position to crop. */
 .wp-block-image img.media-focus-point {
-	height: 100%;
+	height: 100% !important;
 	object-fit: cover;
 }

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.0.7
+ * Version: 2.0.9
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point
@@ -248,14 +248,48 @@ function wpcmfp_register_attachment_meta() {
         'sanitize_callback' => 'sanitize_text_field',
         'auth_callback'     => function () { return current_user_can( 'upload_files' ); },
     ) );
+
+    // Attachments do not always expose registered custom fields in the REST
+    // response. Provide an explicit field for the block editor as a fallback.
+    register_rest_field( 'attachment', 'wpcmfp_focus_point', array(
+        'get_callback' => function ( $attachment ) {
+            return get_post_meta( $attachment['id'], 'bg_pos_desktop', true );
+        },
+        'schema' => array(
+            'type' => 'string',
+            'context' => array( 'view', 'edit' ),
+        ),
+    ) );
 }
 add_action( 'init', 'wpcmfp_register_attachment_meta' );
 
 function wpcmfp_enqueue_block_editor_assets() {
     wp_enqueue_style( 'wpc-mfp-blocks', plugin_dir_url( __FILE__ ) . 'focus-point.css', array(), filemtime( plugin_dir_path( __FILE__ ) . 'focus-point.css' ) );
-    wp_enqueue_script( 'wpc-mfp-block-editor', plugin_dir_url( __FILE__ ) . 'block-editor.js', array( 'wp-data', 'wp-dom-ready' ), filemtime( plugin_dir_path( __FILE__ ) . 'block-editor.js' ), true );
+    wp_enqueue_script( 'wpc-mfp-block-editor', plugin_dir_url( __FILE__ ) . 'block-editor.js', array( 'wp-api-fetch', 'wp-data', 'wp-dom-ready' ), filemtime( plugin_dir_path( __FILE__ ) . 'block-editor.js' ), true );
+
+    $focus_points = array();
+    $post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+    $post = $post_id ? get_post( $post_id ) : null;
+    if ( $post ) {
+        wpcmfp_collect_block_focus_points( parse_blocks( $post->post_content ), $focus_points );
+    }
+    wp_localize_script( 'wpc-mfp-block-editor', 'wpcmfpEditorData', array( 'positions' => $focus_points ) );
 }
 add_action( 'enqueue_block_editor_assets', 'wpcmfp_enqueue_block_editor_assets' );
+
+function wpcmfp_collect_block_focus_points( $blocks, &$focus_points ) {
+    foreach ( $blocks as $block ) {
+        if ( ! empty( $block['innerBlocks'] ) ) {
+            wpcmfp_collect_block_focus_points( $block['innerBlocks'], $focus_points );
+        }
+        if ( 'core/image' === $block['blockName'] && ! empty( $block['attrs']['id'] ) ) {
+            $position = get_post_meta( absint( $block['attrs']['id'] ), 'bg_pos_desktop', true );
+            if ( wpcmfp_has_focus_point( $position ) ) {
+                $focus_points[ (string) absint( $block['attrs']['id'] ) ] = $position;
+            }
+        }
+    }
+}
 
 function wpcmfp_enqueue_frontend_assets() {
     wp_enqueue_style( 'wpc-mfp-blocks', plugin_dir_url( __FILE__ ) . 'focus-point.css', array(), filemtime( plugin_dir_path( __FILE__ ) . 'focus-point.css' ) );

@@ -4,7 +4,7 @@ Tags: focus, focal, image, background, video
 Requires at least: 6.0
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 2.0.9
+Stable tag: 2.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -109,8 +109,15 @@ Yes, the plugin is designed to be compatible with most WordPress themes that use
 
 == Changelog ==
 
+= 2.1.0 =
+* Use a core Image block's own Gutenberg focal point on the backend and frontend.
+* Fall back to the attachment-wide Media Focus Point value when no block-specific focal point is set.
+* Keep attachment-wide focus point changes active until a block-specific Gutenberg value is chosen.
+
 = 2.0.9 =
-* Fixed the core Image block preview when Gutenberg omits the image class and sets an inline height.
+* Use a core Image block's own Gutenberg focal point on the backend and frontend.
+* Fall back to the attachment-wide Media Focus Point value when no block-specific focal point is set.
+* Keep attachment-wide focus point changes active until a block-specific Gutenberg value is chosen.
 
 = 2.0.8 =
 * Improved core Image block preview updates in the block editor.

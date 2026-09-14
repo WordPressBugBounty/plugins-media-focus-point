@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.0.9
+ * Version: 2.1.0
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point
@@ -169,6 +169,34 @@ function wpcmfp_has_focus_point( $position ) {
     return ! empty( $position ) && '50% 50%' !== trim( $position );
 }
 
+/**
+ * Convert a core/image block focal point to the CSS object-position format.
+ *
+ * A block-specific focal point takes precedence over the attachment-wide
+ * focus point on the frontend as well as in the editor.
+ *
+ * @param array $block Block data.
+ * @return string|false CSS position or false when no custom block position exists.
+ */
+function wpcmfp_get_block_focal_point_position( $block ) {
+    if ( empty( $block['attrs']['focalPoint'] ) || ! is_array( $block['attrs']['focalPoint'] ) ) {
+        return false;
+    }
+
+    $focal_point = $block['attrs']['focalPoint'];
+    if ( ! isset( $focal_point['x'], $focal_point['y'] ) ) {
+        return false;
+    }
+
+    $x = (float) $focal_point['x'];
+    $y = (float) $focal_point['y'];
+    if ( 0.5 === $x && 0.5 === $y ) {
+        return false;
+    }
+
+    return round( max( 0, min( 1, $x ) ) * 100 ) . '% ' . round( max( 0, min( 1, $y ) ) * 100 ) . '%';
+}
+
 
 // Function that is called when a video block is rendered
 function wpcmfp_filter_gallery_video_attributes( $atts, $attachment ) {
@@ -192,6 +220,15 @@ add_filter('render_block', function ($block_content, $block) {
     if (in_array($block['blockName'], ['core/video', 'core/image']) && isset($block['attrs']['id'])) {
         $media_id = $block['attrs']['id']; // Get the video or photo ID
         $object_position = get_post_meta($media_id, 'bg_pos_desktop', true);
+
+        // A focus point selected on this block is more specific than the
+        // attachment-wide value and must win on the frontend too.
+        if ( 'core/image' === $block['blockName'] ) {
+            $block_position = wpcmfp_get_block_focal_point_position( $block );
+            if ( false !== $block_position ) {
+                $object_position = $block_position;
+            }
+        }
 
         // If a background position is defined, apply it
         if (wpcmfp_has_focus_point($object_position)) {

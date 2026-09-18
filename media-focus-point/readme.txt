@@ -2,9 +2,9 @@
 Contributors: wpcompany
 Tags: focus, focal, image, background, video
 Requires at least: 6.0
-Tested up to: 7.0.2
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.1.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,6 +108,13 @@ Yes, the plugin is designed to be compatible with most WordPress themes that use
 3. This screenshot illustrates how the image resizes while ensuring the focus point remains visible.
 
 == Changelog ==
+
+= 2.1.2 =
+* Stop forcing `object-fit: cover` and a fixed height on ordinary and Gutenberg images.
+* Keep image sizing and cropping controlled by WordPress, Gutenberg, and the active theme.
+
+= 2.1.1 =
+* Updated the tested WordPress compatibility metadata for the 7.1 release branch, including WordPress 7.1.1.
 
 = 2.1.0 =
 * Use a core Image block's own Gutenberg focal point on the backend and frontend.

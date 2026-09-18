@@ -1,5 +1,2 @@
-/* Only focused images need a constrained box for object-position to crop. */
-.wp-block-image img.media-focus-point {
-	height: 100% !important;
-	object-fit: cover;
-}
+/* The plugin supplies object-position only. Image sizing and cropping remain
+ * controlled by WordPress, the block settings, and the active theme. */

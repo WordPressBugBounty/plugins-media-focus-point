@@ -2,12 +2,12 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.1.0
+ * Version: 2.1.2
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point
  * Domain Path: /languages
- * Tested up to: 6.9
+ * Tested up to: 7.1
  * License: GPLv3 or later
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -140,7 +140,7 @@ function wpcmfp_filter_gallery_img_attributes( $atts, $attachment ) {
     $bg_pos_desktop = get_post_meta( $attachment->ID, 'bg_pos_desktop', true );
 
     if ( wpcmfp_has_focus_point( $bg_pos_desktop ) ) {
-        $style = 'object-position: ' . esc_attr( $bg_pos_desktop ) . '; object-fit: cover;';
+        $style = 'object-position: ' . esc_attr( $bg_pos_desktop ) . ';';
         $atts['style'] = isset( $atts['style'] ) ? $atts['style'] . ' ' . $style : $style;
         $atts['class'] = isset( $atts['class'] ) ? $atts['class'] . ' media-focus-point' : 'media-focus-point';
 
@@ -233,7 +233,6 @@ add_filter('render_block', function ($block_content, $block) {
         // If a background position is defined, apply it
         if (wpcmfp_has_focus_point($object_position)) {
             $style = 'object-position: ' . esc_attr($object_position) . ';';
-            $style .= ' object-fit: cover;';
             $tag = $block['blockName'] === 'core/video' ? 'video' : 'img';
             $block_content = preg_replace_callback(
                 '#<' . $tag . '([^>]*)>#',

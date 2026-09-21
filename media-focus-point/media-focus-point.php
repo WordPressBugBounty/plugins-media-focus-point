@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.1.2
+ * Version: 2.1.3
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point
@@ -158,6 +158,54 @@ function wpcmfp_filter_gallery_img_attributes( $atts, $attachment ) {
     return $atts;
 }
 add_filter( 'wp_get_attachment_image_attributes', 'wpcmfp_filter_gallery_img_attributes', 10, 2 );
+
+/**
+ * Keep the focus point on the actual image when Imagify wraps it in <picture>.
+ *
+ * Imagify copies the original image attributes to the <picture> element, but
+ * deliberately removes `style` and `class` from the generated <img>. CSS
+ * `object-position` only applies to the replaced element that renders the
+ * image, so a value on <picture> has no effect. Copy just the focus-point
+ * declaration back to the generated <img> through Imagify's public filter.
+ *
+ * @param array $attributes Attributes for the generated <img>.
+ * @param array $image      Imagify's parsed image data.
+ * @return array
+ */
+function wpcmfp_filter_imagify_picture_img_attributes( $attributes, $image ) {
+    if ( empty( $image['attributes'] ) || ! is_array( $image['attributes'] ) ) {
+        return $attributes;
+    }
+
+    $original_style = isset( $image['attributes']['style'] )
+        ? (string) $image['attributes']['style']
+        : '';
+
+    if ( ! preg_match( '/(?:^|;)\s*object-position\s*:\s*([^;]+)\s*;?/i', $original_style, $match ) ) {
+        return $attributes;
+    }
+
+    $focus_style = 'object-position: ' . trim( $match[1] ) . ';';
+    $existing_style = isset( $attributes['style'] ) ? trim( (string) $attributes['style'] ) : '';
+
+    if ( '' !== $existing_style && ';' !== substr( $existing_style, -1 ) ) {
+        $existing_style .= ';';
+    }
+
+    $attributes['style'] = trim( $existing_style . ' ' . $focus_style );
+
+    // Imagify also removes the original class from its generated <img>.
+    // Restore only our marker, so focus-point-specific CSS keeps working.
+    if ( ! empty( $image['attributes']['class'] ) && preg_match( '/(?:^|\s)media-focus-point(?:\s|$)/', (string) $image['attributes']['class'] ) ) {
+        $existing_class = isset( $attributes['class'] ) ? trim( (string) $attributes['class'] ) : '';
+        if ( ! preg_match( '/(?:^|\s)media-focus-point(?:\s|$)/', $existing_class ) ) {
+            $attributes['class'] = trim( $existing_class . ' media-focus-point' );
+        }
+    }
+
+    return $attributes;
+}
+add_filter( 'imagify_picture_img_attributes', 'wpcmfp_filter_imagify_picture_img_attributes', 10, 2 );
 
 /**
  * Return true only for an actual, non-default focus point.

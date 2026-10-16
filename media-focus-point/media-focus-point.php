@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.1.3
+ * Version: 2.1.4
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point
@@ -380,8 +380,19 @@ function wpcmfp_enqueue_frontend_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'wpcmfp_enqueue_frontend_assets' );
 
+// Only load the focus-point UI on screens where attachments can be edited.
+function wpcmfp_should_load_admin_ui() {
+    $screen = get_current_screen();
+
+    return $screen && in_array( $screen->base, array( 'post', 'upload', 'media' ), true );
+}
+
 // Enqueue admin styles/scripts
 function wpcmfp_media_focus_point_admin_scripts() {
+    if ( ! wpcmfp_should_load_admin_ui() ) {
+        return;
+    }
+
     wp_enqueue_style( 'wpc-mfp-css', plugin_dir_url( __FILE__ ) . 'admin.css', [], filemtime( __FILE__ ) );
     wp_enqueue_script( 'wpc-mfp-js', plugin_dir_url( __FILE__ ) . 'script.js', [], filemtime( __FILE__ ), ['in_footer' => true] );
 }
@@ -469,8 +480,11 @@ function MFP_Video($video_id, $attribute_string = '', $class_string = '') {
 }
 
 add_action( 'admin_footer', function() {
+    if ( ! wpcmfp_should_load_admin_ui() ) {
+        return;
+    }
+
     ?>
-    <style>.wpcmfp-overlay: display: none;</style>
     <div class="wpcmfp-overlay wpcmfp-image_focus_point">
         <div class="wpcmfp-img-container">
             <div class="wpcmfp-header">

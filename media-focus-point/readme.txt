@@ -4,7 +4,7 @@ Tags: focus, focal, image, background, video
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.4
+Stable tag: 2.1.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -109,11 +109,15 @@ Yes, the plugin is designed to be compatible with most WordPress themes that use
 
 == Changelog ==
 
+= 2.1.5 =
+* Add compatibility with Pro/Cornerstone image elements and background-image layers.
+* Keep the selected focus point when Cornerstone generates background CSS.
+* Keep the existing behavior unchanged for other themes.
+
 = 2.1.4 =
 * Load the Media Focus Point admin assets and overlay only on screens where attachments can be edited.
-* Prevent the focus point overlay from being rendered on unrelated admin pages
+* Prevent the focus point overlay from being rendered on unrelated admin pages.
 * Remove the invalid inline CSS rule from the admin overlay markup.
-
 = 2.1.3 =
 * Preserve the selected `object-position` on the generated `<img>` when Imagify displays images through `<picture>` tags.
 

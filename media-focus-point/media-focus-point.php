@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Media Focus Point
  * Description: Ensures that your selected focus area of an image or video remains centered and visible, even when resized.
- * Version: 2.1.5
+ * Version: 2.1.6
  * Author: WP Company
  * Author URI: https://www.wpcompany.nl
  * Text Domain: media-focus-point
@@ -490,6 +490,65 @@ function wpcmfp_enqueue_frontend_assets() {
     wp_enqueue_style( 'wpc-mfp-blocks', plugin_dir_url( __FILE__ ) . 'focus-point.css', array(), filemtime( plugin_dir_path( __FILE__ ) . 'focus-point.css' ) );
 }
 add_action( 'wp_enqueue_scripts', 'wpcmfp_enqueue_frontend_assets' );
+
+/**
+ * Return focus points indexed by attachment URL path for Cornerstone's
+ * background-image layers.
+ *
+ * @return array<string, string>
+ */
+function wpcmfp_get_cornerstone_focus_points() {
+    $focus_points = wp_cache_get( 'wpcmfp_cornerstone_focus_points', 'media-focus-point' );
+    if ( false !== $focus_points ) {
+        return $focus_points;
+    }
+
+    $attachment_ids = get_posts( array(
+        'post_type'      => 'attachment',
+        'post_status'    => 'inherit',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => array(
+            array(
+                'key'     => 'bg_pos_desktop',
+                'compare' => 'EXISTS',
+            ),
+        ),
+    ) );
+
+    $focus_points = array();
+    foreach ( $attachment_ids as $attachment_id ) {
+        $position = get_post_meta( $attachment_id, 'bg_pos_desktop', true );
+        $url      = wp_get_attachment_url( $attachment_id );
+        $path     = $url ? wp_parse_url( $url, PHP_URL_PATH ) : false;
+
+        if ( $path && wpcmfp_has_focus_point( $position ) ) {
+            $focus_points[ $path ] = $position;
+        }
+    }
+
+    wp_cache_set( 'wpcmfp_cornerstone_focus_points', $focus_points, 'media-focus-point' );
+    return $focus_points;
+}
+
+function wpcmfp_enqueue_cornerstone_frontend_assets() {
+    if ( ! wpcmfp_is_cornerstone_theme() ) {
+        return;
+    }
+
+    $script_path = plugin_dir_path( __FILE__ ) . 'cornerstone.js';
+    wp_enqueue_script(
+        'wpc-mfp-cornerstone',
+        plugin_dir_url( __FILE__ ) . 'cornerstone.js',
+        array(),
+        filemtime( $script_path ),
+        true
+    );
+    wp_localize_script( 'wpc-mfp-cornerstone', 'wpcmfpCornerstoneData', array(
+        'focusPoints' => wpcmfp_get_cornerstone_focus_points(),
+    ) );
+}
+add_action( 'wp_enqueue_scripts', 'wpcmfp_enqueue_cornerstone_frontend_assets', 20 );
 
 // Only load the focus-point UI on screens where attachments can be edited.
 function wpcmfp_should_load_admin_ui() {

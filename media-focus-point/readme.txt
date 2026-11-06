@@ -4,7 +4,7 @@ Tags: focus, focal, image, background, video
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,6 +108,10 @@ Yes, the plugin is designed to be compatible with most WordPress themes that use
 3. This screenshot illustrates how the image resizes while ensuring the focus point remains visible.
 
 == Changelog ==
+
+= 2.1.6 =
+* Improve Cornerstone support for background images stored in CSS variables.
+* Preserve focus points when Cornerstone applies a default centered background position.
 
 = 2.1.5 =
 * Add compatibility with Pro/Cornerstone image elements and background-image layers.
